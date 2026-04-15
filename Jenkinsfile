@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "yourdockerhubusername/html-app"
+        DOCKER_IMAGE = "princeekr/kuber-test"
     }
 
     stages {
 
         stage('Clone Code') {
             steps {
-                git 'https://github.com/your-repo/html-app.git'
+                git 'https://github.com/princeekr/kuber-test.git'
             }
         }
 
@@ -19,12 +19,17 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Login to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'docker-pass', variable: 'PASS')]) {
-                    sh 'echo $PASS | docker login -u yourdockerhubusername --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE'
+                withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
                 }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh 'docker push $DOCKER_IMAGE'
             }
         }
 
