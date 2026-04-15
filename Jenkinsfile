@@ -29,7 +29,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s-deployment.yaml'
+                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                    writeFile file: 'kubeconfig.yaml', text: KUBECONFIG_CONTENT
+                    sh 'kubectl --kubeconfig=kubeconfig.yaml apply -f k8s-deployment.yaml'
+                }
             }
         }
     }
